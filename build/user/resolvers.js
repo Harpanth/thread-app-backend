@@ -12,22 +12,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const express4_1 = require("@apollo/server/express4");
-const graphql_1 = __importDefault(require("./graphql")); // Ensure import is correct
-function init() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const app = (0, express_1.default)();
-        const PORT = process.env.PORT || 8000;
-        app.use(express_1.default.json());
-        app.get("/", (req, res) => {
-            res.json({ message: "Server is up and running" });
+exports.resolvers = void 0;
+const user_1 = __importDefault(require("../services/user"));
+const queries = {
+    getuserToken: (_, payload) => __awaiter(void 0, void 0, void 0, function* () {
+        const token = yield user_1.default.getUserToken({
+            email: payload.email,
+            password: payload.password
         });
-        const gqlServer = yield (0, graphql_1.default)();
-        app.use("/graphql", (0, express4_1.expressMiddleware)(gqlServer));
-        app.listen(PORT, () => {
-            console.log(`Server started at PORT: ${PORT}`);
-        });
-    });
-}
-init();
+        return token;
+    })
+};
+const mutations = {
+    createUser: (_, payload) => __awaiter(void 0, void 0, void 0, function* () {
+        const res = yield user_1.default.createuser(payload);
+        return res.id;
+    })
+};
+exports.resolvers = { queries, mutations };
