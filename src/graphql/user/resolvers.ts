@@ -1,13 +1,20 @@
-import UserService, { CreateUserPayload, GetUserTokenPayload } from "../services/user"
+import UserService, { CreateUserPayload, GetUserTokenPayload } from "../../services/user"
 
 const queries = {
-    getuserToken: async(_:any,payload:GetUserTokenPayload) => {
+    getUserToken: async(_:any,payload:GetUserTokenPayload) => {
         const token = await UserService.getUserToken({
             email:payload.email,
             password: payload.password
         })
 
         return token;
+    },
+    getCurrentLoggedInUser: async(_:any,parameter:any,context:any) => {
+        if(context && context.user){
+            const id =  context.user.id
+            const user = await UserService.getUserById(id);
+            return user;
+        }
     }
 }
 

@@ -15,6 +15,11 @@ export interface GetUserTokenPayload {
     password: string
 }
 class UserService {
+
+    public static getUserById(id:string){
+        return prismaClient.user.findUnique({where : {id }})
+    }
+
     private static generateHash( salt: string, password: string){
         const hashedPassword = createHmac("sha256", salt)
             .update(password)
@@ -57,6 +62,14 @@ class UserService {
         if(userHashPassword === user.password){
             const token = JWT.sign({id:user.id,email:user.email},JWT_SECRET);
             return token
+        }
+    }
+
+    public static decodeJwtToken(token:string){
+        try {
+            return JWT.verify(token, JWT_SECRET);
+        } catch (error) {
+            throw new Error("Invalid token");
         }
     }
 }

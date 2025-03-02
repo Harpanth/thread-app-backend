@@ -12,28 +12,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resolvers = void 0;
-const user_1 = __importDefault(require("../services/user"));
-const queries = {
-    getUserToken: (_, payload) => __awaiter(void 0, void 0, void 0, function* () {
-        const token = yield user_1.default.getUserToken({
-            email: payload.email,
-            password: payload.password
+const server_1 = require("@apollo/server");
+const user_1 = __importDefault(require("./user"));
+function createApolloGraphqlServer() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const typeDefs = `#graphql
+    ${user_1.default.typeDefs}
+
+    type Query {
+      ${user_1.default.queries}
+    }
+
+    type Mutation {
+      ${user_1.default.mutations}
+    }
+  `;
+        const gqlServer = new server_1.ApolloServer({
+            typeDefs,
+            resolvers: {
+                Query: Object.assign({}, user_1.default.resolvers.queries),
+                Mutation: Object.assign({}, user_1.default.resolvers.mutations),
+            },
         });
-        return token;
-    }),
-    getCurrentLoggedInUser: (_, parameter, context) => __awaiter(void 0, void 0, void 0, function* () {
-        if (context && context.user) {
-            const id = context.user.id;
-            const user = yield user_1.default.getUserById(id);
-            return user;
-        }
-    })
-};
-const mutations = {
-    createUser: (_, payload) => __awaiter(void 0, void 0, void 0, function* () {
-        const res = yield user_1.default.createuser(payload);
-        return res.id;
-    })
-};
-exports.resolvers = { queries, mutations };
+        yield gqlServer.start();
+        return gqlServer;
+    });
+}
+exports.default = createApolloGraphqlServer;

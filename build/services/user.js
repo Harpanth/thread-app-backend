@@ -17,6 +17,9 @@ const db_1 = require("../lib/db");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const JWT_SECRET = "dHILLON";
 class UserService {
+    static getUserById(id) {
+        return db_1.prismaClient.user.findUnique({ where: { id } });
+    }
     static generateHash(salt, password) {
         const hashedPassword = (0, crypto_1.createHmac)("sha256", salt)
             .update(password)
@@ -56,6 +59,14 @@ class UserService {
                 return token;
             }
         });
+    }
+    static decodeJwtToken(token) {
+        try {
+            return jsonwebtoken_1.default.verify(token, JWT_SECRET);
+        }
+        catch (error) {
+            throw new Error("Invalid token");
+        }
     }
 }
 exports.default = UserService;
